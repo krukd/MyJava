@@ -1,5 +1,6 @@
 package ru.geekbrains.gui;
 
+import org.apache.commons.io.input.ReversedLinesFileReader;
 import ru.geekbrains.chat.common.MessageLibrary;
 import ru.geekbrains.net.MessageSocketThread;
 import ru.geekbrains.net.MessageSocketThreadListener;
@@ -8,11 +9,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -147,6 +146,8 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
         chatArea.append(messageToChat);
         putIntoFileHistory(user, messageToChat);
     }
+//HomeWork3  1. Добавить в сетевой чат запись локальной истории в текстовый файл на клиенте.
+
 
     private void putIntoFileHistory(String user, String msg) {
         try (PrintWriter pw = new PrintWriter(new FileOutputStream(user + "-history.txt", true))) {
@@ -155,6 +156,31 @@ public class ClientGUI extends JFrame implements ActionListener, Thread.Uncaught
             showError(msg);
         }
     }
+
+//HomeWork3 2. После загрузки клиента показывать ему последние 100 строк чата.
+
+
+//Подскажите, где конкретно нужно использовать этот метод, чтобы выполнялось условие задачи?
+    private String readHistory(String fileName) { //читаем файл с конца, отбираем 100 строк
+        StringBuilder history = new StringBuilder();
+        File srcFile = new File(fileName);
+        if (srcFile.exists()) {
+            try (ReversedLinesFileReader file = new ReversedLinesFileReader(srcFile, Charset.defaultCharset())) {
+                int counter = 0;
+                String line = file.readLine();
+                while (counter < 99 && line != null) {
+                    history.insert(0, line + "\n");
+                    line = file.readLine();
+                    counter++;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return history.toString();
+    }
+
+
 
     private void showError(String errorMsg) {
         JOptionPane.showMessageDialog(this, errorMsg, "Exception!", JOptionPane.ERROR_MESSAGE);
